@@ -1,13 +1,13 @@
 import SwiftUI
 
-struct TileView: View {
+struct TileView<M: Matchable>: View {
   @Binding var isOn: Bool
   @State private var angle: Double = 0
   private var color: Color {
     isOn ? .yellow : .green
   }
 
-  let character: Character
+  let matchable: M
 
   var body: some View {
     ZStack(alignment: .center) {
@@ -17,7 +17,7 @@ struct TileView: View {
         .onChange(of: isOn) {
           angle = isOn ? 180 : 0
         }
-      EmojiView(character: character)
+      matchable.content
         .opacity(isOn ? 1 : 0)
     }
     .rotation3DEffect(
@@ -28,27 +28,9 @@ struct TileView: View {
   }
 }
 
-struct EmojiView: View {
-  let character: Character
-
-  var body: some View {
-    GeometryReader { geometry in
-      Text(String(character))
-        .font(.system(size: geometry.largestDimension * 0.8))
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-  }
-}
-
-extension GeometryProxy {
-  var largestDimension: CGFloat {
-    max(size.height, size.width)
-  }
-}
-
 struct TileView_Previews: PreviewProvider {
   static var previews: some View {
-    TileView(isOn: .constant(true), character: "💩")
+    TileView(isOn: .constant(true), matchable: Character("💩"))
       .previewLayout(.fixed(width: 100, height: 100))
   }
 }

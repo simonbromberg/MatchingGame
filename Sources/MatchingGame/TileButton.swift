@@ -1,9 +1,9 @@
 import AVFoundation
 import SwiftUI
 
-struct TileButton: View {
+struct TileButton<M: Matchable>: View {
   @Binding var isOn: Bool
-  let character: Character
+  let matchable: M
 
   var body: some View {
     Button {
@@ -12,7 +12,7 @@ struct TileButton: View {
       }
       isOn.toggle()
     } label: {
-      TileView(isOn: $isOn, character: character)
+      TileView(isOn: $isOn, matchable: matchable)
     }
     .buttonStyle(.plain)
   }
@@ -25,9 +25,13 @@ struct TileButton: View {
 
 struct TileButton_Previews: PreviewProvider {
   static var previews: some View {
-    TileButton(isOn: .constant(true), character: "💩")
+    TileButton(isOn: .constant(true), matchable: Character.test)
       .previewLayout(.fixed(width: 100, height: 100))
-    TileButton(isOn: .constant(false), character: "💩")
+    TileButton(isOn: .constant(false), matchable: Character.test)
       .previewLayout(.fixed(width: 100, height: 100))
   }
+}
+
+extension Character {
+  static let test: Character = "💩"
 }

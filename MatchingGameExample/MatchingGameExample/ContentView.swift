@@ -10,7 +10,7 @@ import SwiftUI
 
 struct ContentView: View {
   var body: some View {
-    MatchingContentView(squareSize: 100)
+    MatchingContentView(matchables: Character.emojis, squareSize: 100)
   }
 }
 

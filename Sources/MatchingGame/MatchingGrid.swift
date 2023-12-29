@@ -1,18 +1,18 @@
 import AVFoundation
 import SwiftUI
 
-struct MatchingGrid: View {
+struct MatchingGrid<M: Matchable>: View {
   let columns: Int
-  let characters: [Character]
+  let matchables: [M]
   let columnLayout: [GridItem]
 
   @Binding var isFinished: Bool
   @State private var selection = Selection()
-  @State private var matched: Set<Character> = []
+  @State private var matched: Set<M> = []
 
-  init(columns: Int, characters: [Character], isFinished: Binding<Bool>) {
+  init(columns: Int, matchables: [M], isFinished: Binding<Bool>) {
     self.columns = columns
-    self.characters = (characters + characters).shuffled()
+    self.matchables = (matchables + matchables).shuffled()
     columnLayout = .init(repeating: GridItem(), count: columns)
     _isFinished = isFinished
   }
@@ -43,34 +43,34 @@ struct MatchingGrid: View {
     }
   }
 
-  static let margin: CGFloat = 10
+  private let margin: CGFloat = 10
 
   var body: some View {
-    LazyVGrid(columns: columnLayout, spacing: Self.margin) {
-      ForEach(0..<characters.count, id: \.self) { index in
+    LazyVGrid(columns: columnLayout, spacing: margin) {
+      ForEach(0..<matchables.count, id: \.self) { index in
         TileButton(
           isOn: Binding(
             get: {
               self.selection.contains(index) ||
-                self.matched.contains(characters[index])
+                self.matched.contains(matchables[index])
             },
             set: { _, _ in
               guard !selection.contains(index),
                     !selection.isFull,
-                    !matched.contains(characters[index])
+                    !matched.contains(matchables[index])
               else {
                 return
               }
-              let character = characters[index]
+              let matchable = matchables[index]
 
               var delayForSelectionReset: TimeInterval = 1
 
               if let selection = selection.first {
-                if character == characters[selection] {
-                  matched.insert(character)
+                if matchable == matchables[selection] {
+                  matched.insert(matchable)
                   DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                     playMatchSound()
-                    if matched.count >= characters.count / 2 {
+                    if matched.count >= matchables.count / 2 {
                       playWinSound()
 
                       DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
@@ -88,10 +88,10 @@ struct MatchingGrid: View {
               selection.insert(index)
             }
           ),
-          character: characters[index]
+          matchable: matchables[index]
         )
       }
-    }.padding(Self.margin).background()
+    }.padding(margin).background()
   }
 
   private func playMatchSound() {
@@ -107,7 +107,7 @@ struct MatchingGrid: View {
 
 struct MatchingGrid_Previews: PreviewProvider {
   static var previews: some View {
-    MatchingGrid(columns: 2, characters: Array(emojis.shuffled().prefix(upTo: 2)), isFinished: .constant(false))
+    MatchingGrid(columns: 2, matchables: Array(Character.emojis.shuffled().prefix(upTo: 2)), isFinished: .constant(false))
       .previewLayout(.sizeThatFits)
   }
 }

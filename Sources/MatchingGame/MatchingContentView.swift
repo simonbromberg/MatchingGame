@@ -1,8 +1,9 @@
 import AVFoundation
 import SwiftUI
 
-public struct MatchingContentView: View {
-  public init(squareSize: CGFloat) {
+public struct MatchingContentView<M: Matchable>: View {
+  public init(matchables: [M], squareSize: CGFloat) {
+    self.matchables = matchables
     self.squareSize = squareSize
   }
 
@@ -10,14 +11,16 @@ public struct MatchingContentView: View {
 
   let squareSize: CGFloat
 
+  let matchables: [M]
+
   @State private var isFinished = false
 
   public var body: some View {
     GeometryReader { geometry in
       let columns = getColumns(geometry)
       let count = getCount(geometry, columns)
-      let emojis = Array(emojis.shuffled().prefix(upTo: count / 2))
-      MatchingGrid(columns: columns, characters: emojis, isFinished: $isFinished)
+      let emojis = Array(matchables.shuffled().prefix(upTo: count / 2))
+      MatchingGrid(columns: columns, matchables: emojis, isFinished: $isFinished)
     }
     .onChange(of: isFinished) {
       isFinished = false
@@ -28,15 +31,19 @@ public struct MatchingContentView: View {
   }
 
   func getColumns(_ geometry: GeometryProxy) -> Int {
-    let availableWidth = geometry.size.width - MatchingGrid.margin
-    let square = squareSize + MatchingGrid.margin
+    let availableWidth = geometry.size.width - .margin
+    let square = squareSize + .margin
     return max(Int(floor(availableWidth / square)), 1)
   }
 
   func getCount(_ geometry: GeometryProxy, _ columns: Int) -> Int {
-    let availableHeight = geometry.size.height - MatchingGrid.margin
-    let square = columns > 1 ? squareSize + MatchingGrid.margin : geometry.size.width - 2 * MatchingGrid.margin
+    let availableHeight = geometry.size.height - .margin
+    let square = columns > 1 ? squareSize + .margin : geometry.size.width - 2 * .margin
     let count = Int(floor(availableHeight / square)) * columns
     return count % 2 == 0 ? count : count - 1
   }
+}
+
+extension CGFloat {
+  static let margin: Self = 10
 }
