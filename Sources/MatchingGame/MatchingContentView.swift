@@ -2,14 +2,11 @@ import AVFoundation
 import SwiftUI
 
 public struct MatchingContentView<M: Matchable>: View {
-  public init(matchables: [M], squareSize: CGFloat) {
+  public init(matchables: [M]) {
     self.matchables = matchables
-    self.squareSize = squareSize
   }
 
   @Environment(\.dismiss) var dismiss
-
-  let squareSize: CGFloat
 
   let matchables: [M]
 
@@ -17,10 +14,11 @@ public struct MatchingContentView<M: Matchable>: View {
 
   public var body: some View {
     GeometryReader { geometry in
-      let columns = getColumns(geometry)
-      let count = getCount(geometry, columns)
-      let emojis = Array(matchables.shuffled().prefix(upTo: count / 2))
-      MatchingGrid(columns: columns, matchables: emojis, isFinished: $isFinished)
+      let (cols, rows, size) = getGridSize(geometry)
+      let count = cols * rows
+      let matchablesSubset = Array(matchables.shuffled().prefix(count / 2))
+
+      MatchingGrid(columns: cols, size: size, matchables: matchablesSubset, isFinished: $isFinished)
     }
     .onChange(of: isFinished) {
       isFinished = false
@@ -30,17 +28,30 @@ public struct MatchingContentView<M: Matchable>: View {
     }
   }
 
-  func getColumns(_ geometry: GeometryProxy) -> Int {
-    let availableWidth = geometry.size.width - .margin
-    let square = squareSize + .margin
-    return max(Int(floor(availableWidth / square)), 1)
-  }
+  func getGridSize(_ geometry: GeometryProxy) -> (Int, Int, CGFloat) {
+    let availableWidth = geometry.size.width - .margin * 2
+    let availableHeight = geometry.size.height - .margin * 2
+    let area = availableWidth * availableHeight
 
-  func getCount(_ geometry: GeometryProxy, _ columns: Int) -> Int {
-    let availableHeight = geometry.size.height - .margin
-    let square = columns > 1 ? squareSize + .margin : geometry.size.width - 2 * .margin
-    let count = Int(floor(availableHeight / square)) * columns
-    return count % 2 == 0 ? count : count - 1
+    var tileSize = max(sqrt(area / CGFloat(matchables.count * 2)), 50) // TODO: handle case with zero elements
+    var cols = Int(floor(availableWidth / tileSize))
+    var rows = Int(floor(availableHeight / tileSize))
+
+    // Must have even number of tiles, if both xrows and cols are odd then tile count will be odd
+    if cols % 2 != 0 && rows % 2 != 0 {
+      if cols > rows {
+        cols -= 1
+      } else {
+        rows -= 1
+      }
+    }
+    
+    let extraHorizontal = (availableWidth - tileSize * CGFloat(cols)) / CGFloat(cols)
+    let extraVertical = (availableHeight - tileSize * CGFloat(rows)) / CGFloat(rows)
+
+    tileSize += min(extraHorizontal, extraVertical) - .margin // TODO: figure out margin incorporation
+
+    return (cols, rows, tileSize)
   }
 }
 

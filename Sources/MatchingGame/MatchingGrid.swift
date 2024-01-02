@@ -10,10 +10,13 @@ struct MatchingGrid<M: Matchable>: View {
   @State private var selection = Selection()
   @State private var matched: Set<M> = []
 
-  init(columns: Int, matchables: [M], isFinished: Binding<Bool>) {
+  init(columns: Int, size: CGFloat, matchables: [M], isFinished: Binding<Bool>) {
     self.columns = columns
     self.matchables = (matchables + matchables).shuffled()
-    columnLayout = .init(repeating: GridItem(), count: columns)
+    columnLayout = .init(
+      repeating: .init(.fixed(size)),
+      count: columns
+    )
     _isFinished = isFinished
   }
 
@@ -43,10 +46,8 @@ struct MatchingGrid<M: Matchable>: View {
     }
   }
 
-  private let margin: CGFloat = 10
-
   var body: some View {
-    LazyVGrid(columns: columnLayout, spacing: margin) {
+    LazyVGrid(columns: columnLayout, spacing: .margin) {
       ForEach(0..<matchables.count, id: \.self) { index in
         TileButton(
           isOn: Binding(
@@ -91,7 +92,7 @@ struct MatchingGrid<M: Matchable>: View {
           matchable: matchables[index]
         )
       }
-    }.padding(margin).background()
+    }.padding(.margin).background()
   }
 
   private func playMatchSound() {
@@ -107,7 +108,12 @@ struct MatchingGrid<M: Matchable>: View {
 
 struct MatchingGrid_Previews: PreviewProvider {
   static var previews: some View {
-    MatchingGrid(columns: 2, matchables: Array(Character.emojis.shuffled().prefix(upTo: 2)), isFinished: .constant(false))
-      .previewLayout(.sizeThatFits)
+    MatchingGrid(
+      columns: 2,
+      size: 100,
+      matchables: Array(Character.emojis.shuffled().prefix(upTo: 2)),
+      isFinished: .constant(false)
+    )
+    .previewLayout(.sizeThatFits)
   }
 }
