@@ -2,9 +2,11 @@ import SwiftUI
 
 struct TileView<M: Matchable>: View {
   @Binding var isOn: Bool
+  @Binding var isMatched: Bool
+
   @State private var angle: Double = 0
   private var color: Color {
-    isOn ? .yellow : .green
+    isMatched ? .gray : (isOn ? .yellow : .green)
   }
 
   let matchable: M
@@ -30,7 +32,7 @@ struct TileView<M: Matchable>: View {
 
 struct TileView_Previews: PreviewProvider {
   static var previews: some View {
-    TileView(isOn: .constant(true), matchable: Character("💩"))
+    TileView(isOn: .constant(true), isMatched: .constant(false), matchable: Character("💩"))
       .previewLayout(.fixed(width: 100, height: 100))
   }
 }

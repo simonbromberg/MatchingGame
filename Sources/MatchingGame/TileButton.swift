@@ -3,6 +3,8 @@ import SwiftUI
 
 struct TileButton<M: Matchable>: View {
   @Binding var isOn: Bool
+  @Binding var isMatched: Bool
+
   let matchable: M
 
   var body: some View {
@@ -12,7 +14,7 @@ struct TileButton<M: Matchable>: View {
       }
       isOn.toggle()
     } label: {
-      TileView(isOn: $isOn, matchable: matchable)
+      TileView(isOn: $isOn, isMatched: $isMatched, matchable: matchable)
     }
     .buttonStyle(.plain)
   }
@@ -25,9 +27,9 @@ struct TileButton<M: Matchable>: View {
 
 struct TileButton_Previews: PreviewProvider {
   static var previews: some View {
-    TileButton(isOn: .constant(true), matchable: Character.test)
+    TileButton(isOn: .constant(true), isMatched: .constant(false), matchable: Character.test)
       .previewLayout(.fixed(width: 100, height: 100))
-    TileButton(isOn: .constant(false), matchable: Character.test)
+    TileButton(isOn: .constant(false), isMatched: .constant(false), matchable: Character.test)
       .previewLayout(.fixed(width: 100, height: 100))
   }
 }

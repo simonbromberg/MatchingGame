@@ -89,6 +89,9 @@ struct MatchingGrid<M: Matchable>: View {
               selection.insert(index)
             }
           ),
+          isMatched: .constant(
+            self.matched.contains(matchables[index])
+          ),
           matchable: matchables[index]
         )
       }
