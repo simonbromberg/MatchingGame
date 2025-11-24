@@ -13,10 +13,10 @@ struct MatchingGrid<M: Matchable>: View {
   init(columns: Int, size: CGFloat, matchables: [M], isFinished: Binding<Bool>) {
     self.columns = columns
     self.matchables = (matchables + matchables).shuffled()
-    columnLayout = .init(
+    columnLayout = size != .zero ? .init(
       repeating: .init(.fixed(size)),
       count: columns
-    )
+    ) : []
     _isFinished = isFinished
   }
 
